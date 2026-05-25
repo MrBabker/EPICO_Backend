@@ -1,0 +1,6 @@
+@epico_backend_HostAddress = http://localhost:5173
+
+GET {{epico_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
