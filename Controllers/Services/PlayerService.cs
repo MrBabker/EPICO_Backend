@@ -4,7 +4,9 @@ using epico_backend.DTOs;
 using epico_backend.models.players;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using System.Numerics;
+using System.Text.Json;
 
 namespace epico_backend.Controllers.Services
 {
@@ -13,24 +15,62 @@ namespace epico_backend.Controllers.Services
         private readonly ILogger<PlayerService> _logger;
         private readonly IConfiguration _configuration;
         private readonly AppDbContext _appDbContext;
-        public PlayerService(ILogger<PlayerService> logger, IConfiguration configuration, AppDbContext appDbContext)
+        private readonly RedisService _redis;
+        public PlayerService(ILogger<PlayerService> logger, IConfiguration configuration, AppDbContext appDbContext, RedisService redis)
         {
             _logger = logger;
             _configuration = configuration;
             _appDbContext = appDbContext;
+            _redis = redis;
         }
 
         public async Task<List<PlayerModel>> GetAllPlayers()
         {
+            string key = "all_players";
+
+            var cached = await _redis.GetAsync(key);
+
+            if (cached.HasValue)
+            {
+                return JsonSerializer.Deserialize<List<PlayerModel>>(cached.ToString())
+                       ?? new List<PlayerModel>();
+            }
+
             var players = await _appDbContext.players.ToListAsync();
+
+            await _redis.SetAsync(
+             key,
+             JsonSerializer.Serialize(players),
+             TimeSpan.FromSeconds(10)
+         );
+
             return players;
         }
         public async Task<List<PlayerModel>> Get10Players()
         {
-            return await _appDbContext.players
+            string key = "top10_players";
+
+            var cached = await _redis.GetAsync(key);
+
+            if (cached.HasValue)
+            {
+                Console.WriteLine("Cached");
+                return JsonSerializer.Deserialize<List<PlayerModel>>(cached.ToString())
+                       ?? new List<PlayerModel>();
+            }
+
+            var players = await _appDbContext.players
                 .OrderByDescending(p => p.Points)
                 .Take(10)
                 .ToListAsync();
+
+            await _redis.SetAsync(
+                key,
+                JsonSerializer.Serialize(players),
+                TimeSpan.FromSeconds(10)
+            );
+
+            return players;
         }
         public async Task<bool> CheckName(string name)
         {

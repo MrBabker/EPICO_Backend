@@ -4,6 +4,7 @@ using epico_backend.data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +19,20 @@ builder.Services.AddControllers();
 // ===================== Services =====================
 builder.Services.AddScoped<IPlayerServices, PlayerService>();
 builder.Services.AddScoped<IJwtServices, JwtServices>();
+builder.Services.AddSingleton<RedisService>();
 
+// ===================== Redis =====================
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var config = ConfigurationOptions.Parse(
+        builder.Configuration["Redis:ConnectionString"]
+    );
+
+    config.Ssl = true;
+    config.AbortOnConnectFail = false; // 👈 مهم جدًا
+
+    return ConnectionMultiplexer.Connect(config);
+});
 // ===================== JWT AUTH =====================
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
