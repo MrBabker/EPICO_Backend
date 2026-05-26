@@ -16,6 +16,19 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // ===================== Controllers =====================
 builder.Services.AddControllers();
 
+// ===================== HTTP hosts =====================
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:3000",
+                "https://epico-eight.vercel.app/")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 // ===================== Services =====================
 builder.Services.AddScoped<IPlayerServices, PlayerService>();
 builder.Services.AddScoped<IJwtServices, JwtServices>();
@@ -85,6 +98,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseCors("AllowFrontend");
 app.MapControllers();
 
 app.Run();
