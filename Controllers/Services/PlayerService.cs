@@ -90,6 +90,7 @@ namespace epico_backend.Controllers.Services
             return player;
         }
 
+
         public async Task<bool> UpdatePassword(UpdatePasswordDTO DTO)
         {
             if (DTO.ResetPasswordToken.Trim().Length <= 0) return false;
