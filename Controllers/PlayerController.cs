@@ -93,6 +93,7 @@ namespace epico_backend.Controllers
             {
                 HttpOnly = true,
                 Secure = isSecured,
+                Path="/",
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(30)
             });
@@ -127,6 +128,7 @@ namespace epico_backend.Controllers
             {
                 HttpOnly = true,
                 Secure = isSecured,
+                Path="/",
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(30)
             });
@@ -148,7 +150,13 @@ namespace epico_backend.Controllers
         [HttpPost("logout")]
         public IActionResult Logout()
         {
-            Response.Cookies.Delete("token");
+            Response.Cookies.Delete("token", new CookieOptions
+            {
+                HttpOnly = true,
+                Path="/",
+                Secure = isSecured,
+                SameSite = SameSiteMode.None,
+            });
 
             return Ok(new
             {
