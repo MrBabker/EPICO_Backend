@@ -11,6 +11,7 @@ namespace epico_backend.Controllers
     [Route("api/[controller]")]
     public class PlayerController : ControllerBase
     {
+        private bool isSecured = false;
         private readonly ILogger<PlayerController> _logger;
         private readonly IPlayerServices _playerServices;
         private readonly IJwtServices _jwtServices;
@@ -91,7 +92,7 @@ namespace epico_backend.Controllers
             Response.Cookies.Append("token", token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = isSecured,
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(30)
             });
@@ -125,7 +126,7 @@ namespace epico_backend.Controllers
             Response.Cookies.Append("token", token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = isSecured,
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(30)
             });
