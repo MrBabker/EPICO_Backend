@@ -26,7 +26,8 @@ builder.Services.AddCors(options =>
                 .WithOrigins("http://localhost:3000",
                 "https://epico-eight.vercel.app")
                 .AllowAnyHeader()
-                .AllowAnyMethod();
+                .AllowAnyMethod()
+                .AllowCredentials();
         });
 });
 // ===================== Services =====================
