@@ -11,7 +11,7 @@ namespace epico_backend.Controllers
     [Route("api/[controller]")]
     public class PlayerController : ControllerBase
     {
-        private bool isSecured = false;
+        private bool isSecured = true;
         private readonly ILogger<PlayerController> _logger;
         private readonly IPlayerServices _playerServices;
         private readonly IJwtServices _jwtServices;
