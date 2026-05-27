@@ -24,7 +24,7 @@ namespace epico_backend.Controllers.Services
             _redis = redis;
         }
 
-        public async Task<List<PlayerModel>> GetAllPlayers()
+        public async Task<List<GetPlayerDTO>> GetAllPlayers()
         {
             string key = "all_players";
 
@@ -32,36 +32,20 @@ namespace epico_backend.Controllers.Services
 
             if (cached.HasValue)
             {
-                return JsonSerializer.Deserialize<List<PlayerModel>>(cached.ToString())
-                       ?? new List<PlayerModel>();
-            }
-
-            var players = await _appDbContext.players.ToListAsync();
-
-            await _redis.SetAsync(
-             key,
-             JsonSerializer.Serialize(players),
-             TimeSpan.FromSeconds(10)
-         );
-
-            return players;
-        }
-        public async Task<List<PlayerModel>> Get10Players()
-        {
-            string key = "top10_players";
-
-            var cached = await _redis.GetAsync(key);
-
-            if (cached.HasValue)
-            {
-                Console.WriteLine("Cached");
-                return JsonSerializer.Deserialize<List<PlayerModel>>(cached.ToString())
-                       ?? new List<PlayerModel>();
+                return JsonSerializer.Deserialize<List<GetPlayerDTO>>(
+       cached.ToString()!
+   ) ?? new List<GetPlayerDTO>();
             }
 
             var players = await _appDbContext.players
-                .OrderByDescending(p => p.Points)
-                .Take(10)
+                .Select(x => new GetPlayerDTO
+                {
+                    Id = x.Id,
+                    Email  = x.Email,
+                    UserName = x.UserName,
+                    Level = x.Level,
+                    Name = x.Name
+                })
                 .ToListAsync();
 
             await _redis.SetAsync(
@@ -71,6 +55,59 @@ namespace epico_backend.Controllers.Services
             );
 
             return players;
+        }
+        public async Task<List<GetPlayerDTO>> Get10Players()
+        {
+            string key = "top10_players";
+
+            var cached = await _redis.GetAsync(key);
+
+            if (cached.HasValue)
+            {
+                Console.WriteLine("Cached");
+                return JsonSerializer.Deserialize<List<GetPlayerDTO>>(cached.ToString())
+                       ?? new List<GetPlayerDTO>();
+            }
+         
+            var players = await _appDbContext.players
+                .OrderByDescending(p => p.Points)
+                .Take(10).Select(x => new GetPlayerDTO
+                {
+                    Id = x.Id,
+                    Email = x.Email,
+                    UserName = x.UserName,
+                    Level = x.Level,
+                    Name = x.Name
+                })
+                .ToListAsync();
+
+            await _redis.SetAsync(
+                key,
+                JsonSerializer.Serialize(players),
+                TimeSpan.FromSeconds(10)
+            );
+
+            return players;
+        }
+        public async Task<GetPlayerDTO?> GetCurrentUser(int payloadId)
+        {
+           
+            var player = await _appDbContext.players.Select(x => new GetPlayerDTO
+            {
+                Id = x.Id,
+                Email = x.Email,
+                UserName = x.UserName,
+                Level = x.Level,
+                Name = x.Name
+            })
+                .FirstOrDefaultAsync(x => x.Id == payloadId);
+
+            if (player == null)
+            {
+                return null;
+            }
+
+            return player;
         }
         public async Task<bool> CheckName(string name)
         {

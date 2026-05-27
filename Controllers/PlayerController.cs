@@ -45,6 +45,34 @@ namespace epico_backend.Controllers
                 p.Level
             }));
         }
+        [Authorize]
+        [HttpGet("current")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(userId, out int payloadId))
+            {
+                return Unauthorized("Invalid Token");
+            }
+
+            var player = await _playerServices.GetCurrentUser(payloadId);
+
+            if (player == null)
+            {
+                return NotFound("User Not Found");
+            }
+
+            return Ok(new
+            {
+                name = player.Name,
+                username = player.UserName,
+                email = player.Email,
+                points = player.Points,
+                level = player.Level
+            });
+        }
+
 
         [HttpPost("create")]
         public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDTOO DTO)

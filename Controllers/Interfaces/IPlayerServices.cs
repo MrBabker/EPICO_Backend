@@ -6,8 +6,9 @@ namespace epico_backend.Controllers.Interfaces
 {
     public interface IPlayerServices
     {
-        public Task<List<PlayerModel>> GetAllPlayers();
-        public Task<List<PlayerModel>> Get10Players();
+        public Task<List<GetPlayerDTO>> GetAllPlayers();
+        public Task<List<GetPlayerDTO>> Get10Players();
+        public Task<GetPlayerDTO?> GetCurrentUser(int payloadId);
         public Task<PlayerModel> CreatePlayer(CreatePlayerDTOO DTO);
         public  Task<bool> CheckName(string name);
         public Task<bool> CheckEmail(string email);
