@@ -44,7 +44,8 @@ namespace epico_backend.Controllers.Services
                     Email  = x.Email,
                     UserName = x.UserName,
                     Level = x.Level,
-                    Name = x.Name
+                    Name = x.Name,
+                    Points = x.Points,
                 })
                 .ToListAsync();
 
@@ -77,7 +78,8 @@ namespace epico_backend.Controllers.Services
                     Email = x.Email,
                     UserName = x.UserName,
                     Level = x.Level,
-                    Name = x.Name
+                    Name = x.Name,
+                    Points = x.Points
                 })
                 .ToListAsync();
 
@@ -98,7 +100,8 @@ namespace epico_backend.Controllers.Services
                 Email = x.Email,
                 UserName = x.UserName,
                 Level = x.Level,
-                Name = x.Name
+                Name = x.Name,
+                Points = x.Points
             })
                 .FirstOrDefaultAsync(x => x.Id == payloadId);
 
